@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Work.link | Local Service Marketplace</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="hero-header">
+    <nav class="navbar">
+      <a class="brand" href="#">WORKLINK.COM</a>
+      <button class="mobile-menu-toggle" aria-label="Toggle menu">☰</button>
+      <ul class="nav-links">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#workers">Workers</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a class="button button-secondary" href="login.html">Login</a>
+        <a class="button button-primary" href="register.html">Register</a>
+      </div>
+    </nav>
+
+    <div class="hero-content" id="home">
+      <div>
+        <p class="eyebrow">Local service marketplace</p>
+        <h1>Find trusted service providers near you.</h1>
+        <p class="hero-copy">Search plumbers, electricians, carpenters, tutors and other local workers in your area.</p>
+        <div class="search-panel">
+          <div class="search-input-group">
+            <input id="search-input" type="search" placeholder="Search for plumber, electrician, tutor..." autocomplete="off" />
+            <button id="search-button" class="button button-primary">Search</button>
+          </div>
+          <ul id="suggestions" class="suggestions hidden"></ul>
+        </div>
+      </div>
+      <div class="hero-image">
+        <div class="hero-card">Need help? We connect you with local experts instantly.</div>
+      </div>
+    </div>
+  </header>
+
+  <section class="section services-section" id="services">
+    <div class="section-header">
+      <p class="eyebrow">Popular services</p>
+      <h2>Find the right local professional</h2>
+    </div>
+    <div class="card-grid" id="service-cards"></div>
+  </section>
+
+  <section class="section info-section" id="workers">
+    <div class="info-card">
+      <h2>Search workers and book with confidence</h2>
+      <p>Browse worker profiles, compare ratings, and contact skilled professionals near you.</p>
+      <a class="button button-secondary" href="workers.html">View Workers</a>
+    </div>
+  </section>
+
+  <section class="section about-section" id="about">
+    <div class="section-header">
+      <p class="eyebrow">About Work.link</p>
+      <h2>A simple local marketplace for service work</h2>
+    </div>
+    <p class="section-copy">Work.link helps homeowners and customers quickly find qualified local workers for everyday jobs. We keep the experience clean, responsive, and easy to use.</p>
+  </section>
+
+  <section class="section contact-section" id="contact">
+    <div class="section-header">
+      <p class="eyebrow">Contact</p>
+      <h2>Need help with a request?</h2>
+    </div>
+    <p class="section-copy">Send us a message and we will connect you to the right service provider.</p>
+    <a class="button button-primary" href="mailto:support@work.link">support@work.link</a>
+  </section>
+
+  <script src="js/main.js"></script>
+  <script src="js/auth-ui.js"></script>
+</body>
+</html>
