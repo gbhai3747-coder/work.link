@@ -33,6 +33,7 @@ export function BookingForm({ workerId, services }: BookingFormProps) {
   const [selectedServiceId, setSelectedServiceId] = useState<string>("");
   const [coords, setCoords] = useState<Coordinates | null>(null);
   const [locationLabel, setLocationLabel] = useState<string | null>(null);
+  const [address, setAddress] = useState("");
   const [locating, setLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
 
@@ -48,6 +49,9 @@ export function BookingForm({ workerId, services }: BookingFormProps) {
       const result = await getCurrentPosition();
       setCoords(result.coords);
       const label = await reverseGeocode(result.coords.lat, result.coords.lng);
+      if (label) {
+        setAddress(label);
+      }
       setLocationLabel(label);
     } catch (e) {
       setLocationError(geolocationErrorMessage(e as Parameters<typeof geolocationErrorMessage>[0]));
@@ -80,7 +84,7 @@ export function BookingForm({ workerId, services }: BookingFormProps) {
       serviceId: selectedServiceId,
       jobDescription: String(formData.get("jobDescription") ?? ""),
       preferredTime: new Date(preferredRaw).toISOString(),
-      address: String(formData.get("address") ?? ""),
+      address,
       ...(coords ? { lat: coords.lat, lng: coords.lng } : {}),
     });
 
@@ -92,6 +96,10 @@ export function BookingForm({ workerId, services }: BookingFormProps) {
 
     setStatus("success");
     setCreatedBookingId(result.bookingId);
+    setSelectedServiceId("");
+    setAddress("");
+    setCoords(null);
+    setLocationLabel(null);
     form.reset();
   };
 
@@ -200,6 +208,8 @@ export function BookingForm({ workerId, services }: BookingFormProps) {
           name="address"
           type="text"
           required
+          value={address}
+          onChange={(event) => setAddress(event.target.value)}
           placeholder="123 Main St, Springfield"
         />
       </div>
