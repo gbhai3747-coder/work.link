@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 
 import { createBooking } from "@/app/actions/bookings";
 import { reverseGeocode } from "@/app/actions/geo";
@@ -36,25 +36,52 @@ export function BookingForm({ workerId, services }: BookingFormProps) {
   const [address, setAddress] = useState("");
   const [locating, setLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const detachRef = useRef(false);
+  const addressEditedRef = useRef(false);
 
   const attachLocation = async () => {
     if (coords) {
+      detachRef.current = true;
       setCoords(null);
       setLocationLabel(null);
       return;
     }
+    detachRef.current = false;
     setLocating(true);
     setLocationError(null);
     try {
       const result = await getCurrentPosition();
       setCoords(result.coords);
-      const label = await reverseGeocode(result.coords.lat, result.coords.lng);
-      if (label) {
-        setAddress(label);
+      setLocating(false);
+
+      try {
+        const label = await reverseGeocode(
+          result.coords.lat,
+          result.coords.lng
+        );
+        if (detachRef.current) return;
+        if (label && !addressEditedRef.current) {
+          setAddress(label);
+        }
+        setLocationLabel(label);
+        if (!label) {
+          setLocationError(
+            "Location attached, but we couldn't look up the address. Please type it below."
+          );
+        }
+      } catch {
+        if (detachRef.current) return;
+        setLocationLabel(null);
+        setLocationError(
+          "Location attached, but we couldn't look up the address. Please type it below."
+        );
       }
-      setLocationLabel(label);
     } catch (e) {
-      setLocationError(geolocationErrorMessage(e as Parameters<typeof geolocationErrorMessage>[0]));
+      setLocationError(
+        geolocationErrorMessage(
+          e as Parameters<typeof geolocationErrorMessage>[0]
+        )
+      );
     } finally {
       setLocating(false);
     }
@@ -73,6 +100,11 @@ export function BookingForm({ workerId, services }: BookingFormProps) {
     const preferredRaw = String(formData.get("preferredTime") ?? "");
     if (Number.isNaN(Date.parse(preferredRaw))) {
       setError("Choose a preferred date and time.");
+      return;
+    }
+
+    if (address.trim().length < 3) {
+      setError("Add the job address so the worker knows where to come.");
       return;
     }
 
@@ -209,7 +241,10 @@ export function BookingForm({ workerId, services }: BookingFormProps) {
           type="text"
           required
           value={address}
-          onChange={(event) => setAddress(event.target.value)}
+          onChange={(event) => {
+            addressEditedRef.current = true;
+            setAddress(event.target.value);
+          }}
           placeholder="123 Main St, Springfield"
         />
       </div>

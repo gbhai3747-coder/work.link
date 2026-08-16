@@ -32,9 +32,24 @@ const bookingSchema = z.object({
 export async function createBooking(
   input: z.infer<typeof bookingSchema>
 ): Promise<BookingActionResult> {
+  // TEMP DIAGNOSTICS - safe info only (no values/keys/coordinates). Remove after verifying.
+  console.error("[booking:diag] createBooking started", {
+    hasWorkerId: Boolean(input.workerId),
+    hasServiceId: Boolean(input.serviceId),
+    addressLength: input.address.length,
+    hasCoords: input.lat != null && input.lng != null,
+  });
+
   const { profile } = await requireRole("customer");
+  // TEMP DIAGNOSTICS - safe info only. Remove after verifying.
+  console.error("[booking:diag] auth ok", { role: profile.role });
+
   const parsed = bookingSchema.safeParse(input);
   if (!parsed.success) {
+    // TEMP DIAGNOSTICS - safe info only (field names, not values). Remove after verifying.
+    console.error("[booking:diag] validation failed", {
+      paths: parsed.error.issues.map((issue) => issue.path.join(".")),
+    });
     return {
       ok: false,
       error: "Please check the booking details and try again.",
@@ -83,7 +98,7 @@ export async function createBooking(
     .single();
 
   if (error) {
-    console.error("createBooking failed:", error);
+    console.error("[booking:diag] createBooking failed:", error);
     return {
       ok: false,
       error: "We couldn't create the booking. Please try again.",

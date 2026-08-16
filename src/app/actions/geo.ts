@@ -66,6 +66,7 @@ export async function reverseGeocode(
     return null;
   }
 
+  const startedAt = Date.now();
   try {
     const label = await provider.reverseGeocode(parsed.data.lat, parsed.data.lng);
     // TEMP DIAGNOSTICS - safe info only (no tokens/keys/coordinates). Remove after verifying.
@@ -74,6 +75,7 @@ export async function reverseGeocode(
       mapsProviderEnv: process.env.MAPS_PROVIDER ?? null,
       accessTokenSet: Boolean(geoConfig.accessToken),
       resolved: label != null,
+      elapsedMs: Date.now() - startedAt,
     });
     return label;
   } catch (error) {
@@ -83,6 +85,7 @@ export async function reverseGeocode(
       mapsProviderEnv: process.env.MAPS_PROVIDER ?? null,
       accessTokenSet: Boolean(geoConfig.accessToken),
       error: error instanceof Error ? error.message : String(error),
+      elapsedMs: Date.now() - startedAt,
     });
     return null;
   }
