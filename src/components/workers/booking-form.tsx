@@ -30,6 +30,7 @@ export function BookingForm({ workerId, services }: BookingFormProps) {
   >("idle");
   const [createdBookingId, setCreatedBookingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selectedServiceId, setSelectedServiceId] = useState<string>("");
   const [coords, setCoords] = useState<Coordinates | null>(null);
   const [locationLabel, setLocationLabel] = useState<string | null>(null);
   const [locating, setLocating] = useState(false);
@@ -60,6 +61,11 @@ export function BookingForm({ workerId, services }: BookingFormProps) {
     const form = event.currentTarget;
     const formData = new FormData(form);
 
+    if (!selectedServiceId) {
+      setError("Please pick a service before sending your request.");
+      return;
+    }
+
     const preferredRaw = String(formData.get("preferredTime") ?? "");
     if (Number.isNaN(Date.parse(preferredRaw))) {
       setError("Choose a preferred date and time.");
@@ -71,7 +77,7 @@ export function BookingForm({ workerId, services }: BookingFormProps) {
 
     const result = await createBooking({
       workerId,
-      serviceId: String(formData.get("serviceId")),
+      serviceId: selectedServiceId,
       jobDescription: String(formData.get("jobDescription") ?? ""),
       preferredTime: new Date(preferredRaw).toISOString(),
       address: String(formData.get("address") ?? ""),
@@ -123,23 +129,45 @@ export function BookingForm({ workerId, services }: BookingFormProps) {
     );
   }
 
+  if (services.length === 0) {
+    return (
+      <div className="rounded-xl border border-dashed border-zinc-300 bg-zinc-50/60 p-6 text-center dark:border-zinc-700 dark:bg-zinc-900/40">
+        <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          This worker hasn&apos;t added any services yet
+        </p>
+        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          They can&apos;t receive booking requests until they add a service to
+          their profile.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4" noValidate>
       <div>
-        <Label htmlFor="booking-service">Service</Label>
+        <Label htmlFor="booking-service">Pick a service</Label>
         <select
           id="booking-service"
           name="serviceId"
           required
-          defaultValue={services[0]?.id ?? ""}
+          value={selectedServiceId}
+          onChange={(event) => setSelectedServiceId(event.target.value)}
           className="h-10 w-full rounded-lg border border-zinc-300 bg-white px-3 text-sm text-zinc-900 shadow-sm transition-all focus:border-emerald-500 focus:shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-200 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50 dark:focus:ring-emerald-900"
         >
+          <option value="" disabled>
+            Select a service…
+          </option>
           {services.map((service) => (
             <option key={service.id} value={service.id}>
               {service.name}
             </option>
           ))}
         </select>
+        <p className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+          {services.length} service{services.length === 1 ? "" : "s"} available
+          from this worker
+        </p>
       </div>
 
       <div>
