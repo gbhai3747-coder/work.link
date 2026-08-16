@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 
 import { SiteHeader } from "@/components/layout/site-header";
 import { BackButton } from "@/components/ui/back-button";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
+import { env } from "@/lib/env";
 
 export const metadata: Metadata = {
   title: "Services",
@@ -22,11 +23,29 @@ const tileGradients = [
 ];
 
 export default async function ServicesPage() {
-  const supabase = await createAdminClient();
-  const { data: services } = await supabase
+  const supabase = await createClient();
+  const { data: services, error } = await supabase
     .from("services")
     .select("id, name, slug")
     .order("name");
+
+  // TEMP DIAGNOSTICS - safe info only (no keys/secrets). Remove after verifying.
+  try {
+    const ref = new URL(env.supabaseUrl).hostname.split(".")[0] ?? "unknown";
+    console.error("[services:diag] query finished", {
+      supabaseRef: ref,
+      envSet: {
+        url: Boolean(env.supabaseUrl),
+        anonKey: Boolean(env.supabaseAnonKey),
+        serviceRoleKey: Boolean(env.supabaseServiceRoleKey),
+      },
+      rowCount: services?.length ?? 0,
+      errorCode: error?.code ?? null,
+      errorMessage: error?.message ?? null,
+    });
+  } catch {
+    // diagnostics must never crash the page
+  }
 
   return (
     <>

@@ -3,6 +3,7 @@
 import { z } from "zod";
 
 import { getGeoProvider, type GeocodeResult } from "@/lib/geo";
+import { geoConfig } from "@/lib/geo/config";
 import { coordinatesSchema } from "@/lib/validators";
 
 export type { GeocodeResult };
@@ -54,12 +55,35 @@ export async function reverseGeocode(
   if (!parsed.success) return null;
 
   const provider = getGeoProvider();
-  if (!provider.isConfigured()) return null;
+
+  if (!provider.isConfigured()) {
+    // TEMP DIAGNOSTICS - safe info only (no tokens/keys/coordinates). Remove after verifying.
+    console.error("[geo:diag] reverseGeocode skipped", {
+      provider: provider.name,
+      mapsProviderEnv: process.env.MAPS_PROVIDER ?? null,
+      accessTokenSet: Boolean(geoConfig.accessToken),
+    });
+    return null;
+  }
 
   try {
-    return await provider.reverseGeocode(parsed.data.lat, parsed.data.lng);
+    const label = await provider.reverseGeocode(parsed.data.lat, parsed.data.lng);
+    // TEMP DIAGNOSTICS - safe info only (no tokens/keys/coordinates). Remove after verifying.
+    console.error("[geo:diag] reverseGeocode finished", {
+      provider: provider.name,
+      mapsProviderEnv: process.env.MAPS_PROVIDER ?? null,
+      accessTokenSet: Boolean(geoConfig.accessToken),
+      resolved: label != null,
+    });
+    return label;
   } catch (error) {
-    console.error("reverseGeocode failed:", error);
+    // TEMP DIAGNOSTICS - safe info only (no tokens/keys/coordinates). Remove after verifying.
+    console.error("[geo:diag] reverseGeocode failed", {
+      provider: provider.name,
+      mapsProviderEnv: process.env.MAPS_PROVIDER ?? null,
+      accessTokenSet: Boolean(geoConfig.accessToken),
+      error: error instanceof Error ? error.message : String(error),
+    });
     return null;
   }
 }

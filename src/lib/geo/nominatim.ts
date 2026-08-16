@@ -69,6 +69,7 @@ async function fetchJson(
   const response = await fetch(url, {
     headers: HEADERS,
     cache: "no-store",
+    signal: AbortSignal.timeout(10_000),
   });
   if (!response.ok) {
     throw new Error(
